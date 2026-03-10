@@ -8,6 +8,20 @@ use Inertia\Inertia;
 
 class ReportController extends Controller
 {
+    // Menampilkan halaman riwayat laporan user
+    public function index(Request $request)
+    {
+        return Inertia::render('Reports/Index', [
+            'reports' => $request->user()->reports()->latest()->get()
+        ]);
+    }
+
+    // Menampilkan form laporan baru
+    public function create()
+    {
+        return Inertia::render('Reports/Create');
+    }
+
     // Menyimpan laporan baru ke database
     public function store(Request $request)
     {
@@ -16,13 +30,13 @@ class ReportController extends Controller
             'description' => 'required|string',
         ]);
 
-        // Menyimpan data dengan mengaitkannya ke user yang sedang login
         $request->user()->reports()->create([
             'item_or_room' => $validated['item_or_room'],
             'description' => $validated['description'],
             'status' => 'Belum Dikonfirmasi',
         ]);
 
-        return redirect()->back()->with('message', 'Laporan berhasil dikirim ke Admin!');
+        // Mengarahkan user kembali ke halaman riwayat setelah berhasil melapor
+        return redirect()->route('reports.index');
     }
 }
