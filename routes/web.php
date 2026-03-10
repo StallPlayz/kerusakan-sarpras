@@ -24,12 +24,15 @@ Route::get('/dashboard', function () {
 
 // --- JALUR KHUSUS USER ---
 Route::middleware('auth')->group(function () {
-    // Profil bawaan Breeze
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Jalur untuk mengirim laporan kerusakan sarpras
+    // 1. Jalur untuk melihat riwayat laporan
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // 2. Jalur untuk membuka halaman form laporan baru
+    Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
+    // 3. Jalur untuk memproses form
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
 });
 
@@ -47,4 +50,4 @@ Route::middleware(['auth', EnsureIsAdmin::class])->prefix('admin')->name('admin.
     Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role.update');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
