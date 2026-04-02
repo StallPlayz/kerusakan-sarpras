@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id();
-            // Menghubungkan laporan dengan user yang melapor
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('item_or_room'); // Nama barang atau ruangan yang rusak
-            $table->text('description'); // Detail kerusakan
+            $table->string('room');
+            $table->string('item');
+            $table->text('description');
+            $table->string('image_path')->nullable();
             $table->enum('status', ['Belum Dikonfirmasi', 'Diproses', 'Selesai'])->default('Belum Dikonfirmasi');
             $table->timestamps();
         });

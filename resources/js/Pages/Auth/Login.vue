@@ -5,6 +5,8 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
+import vueRecaptcha from 'vue3-recaptcha2';
+import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
 defineProps({
@@ -16,15 +18,33 @@ defineProps({
     },
 });
 
+const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+const recaptchaWidget = ref(null);
+
 const form = useForm({
     email: '',
     password: '',
     remember: false,
+    'g-recaptcha-response': '',
 });
+
+const recaptchaVerified = (response) => {
+    form['g-recaptcha-response'] = response;
+};
+
+const recaptchaExpired = () => {
+    form['g-recaptcha-response'] = '';
+};
 
 const submit = () => {
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+        onFinish: () => {
+            form.reset('password', 'g-recaptcha-response');
+            if (recaptchaWidget.value) {
+                recaptchaWidget.value.reset();
+            }
+        },
     });
 };
 </script>
@@ -76,6 +96,15 @@ const submit = () => {
                         >Remember me</span
                     >
                 </label>
+            </div>
+
+            <div class="mt-4 flex flex-col items-center">
+                <vue-recaptcha
+                    ref="recaptchaWidget" :sitekey="recaptchaSiteKey"
+                    @verify="recaptchaVerified"
+                    @expire="recaptchaExpired"
+                />
+                <InputError class="mt-2" :message="form.errors['g-recaptcha-response']" />
             </div>
 
             <div class="mt-4 flex items-center justify-end">

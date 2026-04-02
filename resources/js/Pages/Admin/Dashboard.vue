@@ -1,7 +1,18 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
+import { ref } from "vue";
 import Swal from "sweetalert2";
+
+const showModal = ref(false); // Default: modal tertutup
+
+const selectedReport = ref(null); // Default: belum ada laporan yang dipilih
+
+// Fungsi untuk membuka modal dan memasukkan data laporan yang diklik
+const openDetail = (report) => {
+    selectedReport.value = report;
+    showModal.value = true;
+};
 
 const props = defineProps({
     reports: Array,
@@ -21,26 +32,24 @@ const showToast = (message) => {
     });
 };
 
-// Fungsi untuk mengubah status laporan
 const updateStatus = (reportId, newStatus) => {
     router.patch(
         route("admin.reports.update", reportId),
         { status: newStatus },
         {
             preserveScroll: true,
-            onSuccess: () => showToast("Status tiket berhasil diperbarui!"), // <-- Ubah ini
+            onSuccess: () => showToast("Status tiket berhasil diperbarui!"),
         },
     );
 };
 
-// Fungsi untuk mengubah role user
 const updateRole = (userId, newRole) => {
     router.patch(
         route("admin.users.role.update", userId),
         { role: newRole },
         {
             preserveScroll: true,
-            onSuccess: () => showToast("Role user berhasil diubah!"), // <-- Ubah ini
+            onSuccess: () => showToast("Role user berhasil diubah!"),
         },
     );
 };
@@ -69,14 +78,38 @@ const updateRole = (userId, newRole) => {
                             <thead
                                 class="text-xs text-gray-700 uppercase bg-gray-50"
                             >
-                                <tr>
-                                    <th class="px-6 py-3">Pelapor</th>
-                                    <th class="px-6 py-3">Barang/Ruang</th>
-                                    <th class="px-6 py-3">Deskripsi</th>
-                                    <th class="px-6 py-3">Status Saat Ini</th>
-                                    <th class="px-6 py-3">
-                                        Aksi (Ubah Status)
-                                    </th>
+                                <tr
+                                    v-for="report in reports"
+                                    :key="report.id"
+                                    class="border-b"
+                                >
+                                    <td class="px-6 py-4">
+                                        {{ report.user.name }}
+                                    </td>
+
+                                    <td class="px-6 py-4 font-bold">
+                                        {{ report.ruang }} - {{ report.barang }}
+                                    </td>
+
+                                    <td
+                                        class="px-6 py-4 max-w-xs truncate text-gray-500"
+                                        :title="report.deskripsi"
+                                    >
+                                        {{ report.deskripsi }}
+                                    </td>
+
+                                    <td class="px-6 py-4"></td>
+
+                                    <td
+                                        class="px-6 py-4 flex space-x-2 items-center"
+                                    >
+                                        <button
+                                            @click="openDetail(report)"
+                                            class="text-indigo-600 hover:text-indigo-900 font-bold underline text-sm mr-3"
+                                        >
+                                            Lihat Detail
+                                        </button>
+                                    </td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -121,10 +154,15 @@ const updateRole = (userId, newRole) => {
                                                     'Diproses',
                                                 )
                                             "
-                                            class="text-yellow-600 hover:underline"
+                                            :disabled="
+                                                report.status === 'Diproses' ||
+                                                report.status === 'Selesai'
+                                            "
+                                            class="px-3 py-1.5 bg-yellow-500 text-white text-xs font-bold rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-all"
                                         >
                                             Proses
                                         </button>
+
                                         <button
                                             @click="
                                                 updateStatus(
@@ -132,7 +170,10 @@ const updateRole = (userId, newRole) => {
                                                     'Selesai',
                                                 )
                                             "
-                                            class="text-green-600 hover:underline"
+                                            :disabled="
+                                                report.status === 'Selesai'
+                                            "
+                                            class="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-all"
                                         >
                                             Selesai
                                         </button>
@@ -270,10 +311,122 @@ const updateRole = (userId, newRole) => {
                                             </option>
                                         </select>
                                     </td>
+                                    <Link
+                                        :href="
+                                            route(
+                                                'admin.users.destroy',
+                                                user.id,
+                                            )
+                                        "
+                                        method="delete"
+                                        as="button"
+                                        onclick="
+                                            return confirm(
+                                                'Apakah Anda yakin ingin menghapus user ini secara permanen?',
+                                            );
+                                        "
+                                        class="ml-2 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-md hover:bg-red-600 transition"
+                                    >
+                                        Hapus
+                                    </Link>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div
+            v-if="showModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity"
+        >
+            <div
+                class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative shadow-2xl"
+            >
+                <button
+                    @click="showModal = false"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-3xl font-bold leading-none"
+                >
+                    &times;
+                </button>
+
+                <h2
+                    class="text-2xl font-extrabold mb-4 border-b-2 pb-2 text-gray-800"
+                >
+                    Detail Laporan Kerusakan
+                </h2>
+
+                <div
+                    class="space-y-4 text-sm text-gray-700"
+                    v-if="selectedReport"
+                >
+                    <div
+                        class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border"
+                    >
+                        <p>
+                            <span class="font-bold text-gray-900 block"
+                                >Nama Pelapor:</span
+                            >
+                            {{ selectedReport.user.name }}
+                        </p>
+                        <p>
+                            <span class="font-bold text-gray-900 block"
+                                >Status Saat Ini:</span
+                            >
+                            {{ selectedReport.status }}
+                        </p>
+                        <p>
+                            <span class="font-bold text-gray-900 block"
+                                >Ruangan:</span
+                            >
+                            {{ selectedReport.room }}
+                        </p>
+                        <p>
+                            <span class="font-bold text-gray-900 block"
+                                >Barang:</span
+                            >
+                            {{ selectedReport.item }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <span class="font-bold text-gray-900 block mb-1"
+                            >Deskripsi Lengkap:</span
+                        >
+                        <p
+                            class="bg-gray-100 p-4 rounded-lg border text-gray-800 whitespace-pre-wrap leading-relaxed"
+                        >
+                            {{ selectedReport.description }}
+                        </p>
+                    </div>
+
+                    <div
+                        v-if="selectedReport.image_path"
+                        class="mt-4 border-t pt-4"
+                    >
+                        <span class="font-bold text-gray-900 block mb-2"
+                            >Foto Bukti Keluhan:</span
+                        >
+                        <img
+                            :src="'/storage/' + selectedReport.image_path"
+                            alt="Foto Bukti"
+                            class="rounded-lg max-h-96 object-contain w-full bg-gray-200 border-2 border-dashed border-gray-300"
+                        />
+                    </div>
+                    <div v-else class="mt-4 border-t pt-4">
+                        <p class="text-gray-500 italic">
+                            Pelapor tidak melampirkan foto bukti.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button
+                        @click="showModal = false"
+                        class="px-5 py-2.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 font-bold transition-colors"
+                    >
+                        Tutup Jendela
+                    </button>
                 </div>
             </div>
         </div>

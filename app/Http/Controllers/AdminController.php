@@ -43,4 +43,14 @@ class AdminController extends Controller
 
         return redirect()->back()->with('message', 'Role user berhasil diubah!');
     }
+
+    public function destroyUser(\App\Models\User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak bisa menghapus akun Anda sendiri.');
+        }
+
+        $user->delete();
+        return back()->with('success', 'User berhasil dihapus.');
+    }
 }

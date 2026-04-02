@@ -12,8 +12,10 @@ class Report extends Model
     // Kolom-kolom yang boleh diisi datanya melalui form
     protected $fillable = [
         'user_id',
-        'item_or_room',
+        'room',
+        'item',
         'description',
+        'image_path',
         'status',
     ];
 

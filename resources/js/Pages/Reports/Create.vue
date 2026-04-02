@@ -4,8 +4,10 @@ import { Head, useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 
 const form = useForm({
-    item_or_room: "",
+    room: "",
+    item: "",
     description: "",
+    image: null,
 });
 
 const submitReport = () => {
@@ -45,41 +47,57 @@ const submitReport = () => {
                 >
                     <form @submit.prevent="submitReport" class="space-y-6">
                         <div>
-                            <label
-                                class="block font-bold text-sm text-gray-700 mb-1"
-                                >Nama Barang / Ruangan</label
-                            >
-                            <input
-                                v-model="form.item_or_room"
+                            <InputLabel
+                                for="room"
+                                value="Nama Ruangan (Contoh: Lab Komputer 1)"
+                            />
+                            <TextInput
+                                id="room"
                                 type="text"
-                                class="block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
+                                class="mt-1 block w-full"
+                                v-model="form.room"
                                 required
-                                placeholder="Contoh: Proyektor Ruang F205"
+                            />
+                            <InputError
+                                class="mt-2"
+                                :message="form.errors.room"
                             />
                         </div>
 
                         <div>
-                            <label
-                                class="block font-bold text-sm text-gray-700 mb-1"
-                                >Deskripsi Kerusakan</label
-                            >
-                            <textarea
-                                v-model="form.description"
-                                class="block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
-                                rows="4"
+                            <InputLabel
+                                for="item"
+                                value="Nama Barang (Contoh: AC Panasonic / PC No. 12)"
+                            />
+                            <TextInput
+                                id="item"
+                                type="text"
+                                class="mt-1 block w-full"
+                                v-model="form.item"
                                 required
-                                placeholder="Contoh: Kabel power putus dan lampu indikator mati."
-                            ></textarea>
+                            />
+                            <InputError
+                                class="mt-2"
+                                :message="form.errors.item"
+                            />
                         </div>
 
-                        <div class="flex justify-end">
-                            <button
-                                type="submit"
-                                :disabled="form.processing"
-                                class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50"
-                            >
-                                Kirim Laporan Sekarang
-                            </button>
+                        <div>
+                            <InputLabel
+                                for="description"
+                                value="Deskripsi Kerusakan"
+                            />
+                            <textarea
+                                id="description"
+                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                v-model="form.description"
+                                rows="3"
+                                required
+                            ></textarea>
+                            <InputError
+                                class="mt-2"
+                                :message="form.errors.description"
+                            />
                         </div>
                     </form>
                 </div>

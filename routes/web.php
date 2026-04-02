@@ -17,13 +17,13 @@ Route::get('/', function () {
     ]);
 });
 
-// Jalur bawaan Breeze (Bisa kamu jadikan Homepage User nanti)
+// Jalur bawaan Breeze (Homepage (WIP))
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // --- JALUR KHUSUS USER ---
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -40,14 +40,17 @@ Route::middleware('auth')->group(function () {
 // Memasang 2 gembok: harus 'auth' (login) dan harus lewat 'EnsureIsAdmin'
 Route::middleware(['auth', EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
 
-    // Halaman Dashboard Admin (URL: /admin/dashboard)
+    // 1. Halaman Dashboard Admin (URL: /admin/dashboard)
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
-    // Fungsi Update Status Tiket Laporan
+    // 2. Fungsi Update Status Tiket Laporan
     Route::patch('/reports/{report}', [AdminController::class, 'updateReportStatus'])->name('reports.update');
 
-    // Fungsi Mengubah Role User
+    // 3. Fungsi Mengubah Role User
     Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role.update');
+
+    // 4. Jalur untuk menghapus user
+    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
 });
 
 require __DIR__ . '/auth.php';
