@@ -1,5 +1,9 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import Swal from "sweetalert2";
 
@@ -98,6 +102,25 @@ const submitReport = () => {
                                 class="mt-2"
                                 :message="form.errors.description"
                             />
+
+                            <div>
+                                <InputLabel for="image" value="Foto Bukti (Opsional namun disarankan)" class="pt-6"/>
+                                <input
+                                    type="file"
+                                    id="image"
+                                    @input="form.image = $event.target.files[0]"
+                                    accept="image/jpeg, image/png, image/jpg"
+                                    class="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                />
+                                <InputError class="mt-2" :message="form.errors.image" />
+                                <p class="text-xs text-gray-500 mt-1">Format: JPG, JPEG, PNG. Maksimal 5MB.</p>
+                            </div>
+
+                            <div class="flex items-center justify-end mt-6">
+                                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                    Kirim Laporan
+                                </PrimaryButton>
+                            </div>
                         </div>
                     </form>
                 </div>

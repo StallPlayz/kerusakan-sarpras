@@ -47,7 +47,6 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    // --- RELASI DATABASE: Satu User punya banyak Laporan ---
     public function reports()
     {
         return $this->hasMany(Report::class);

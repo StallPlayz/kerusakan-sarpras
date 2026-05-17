@@ -45,15 +45,8 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-
-            // --- AWAL LOGIKA ESCALATING PENALTY ---
-            // 1. Buat nama kunci unik untuk mencatat "dosa" user ini (berdasarkan email & IP)
             $penaltyKey = $this->throttleKey() . '|penalties';
-
-            // 2. Ambil total kegagalan sebelumnya, lalu tambah 1
             $totalFails = Cache::get($penaltyKey, 0) + 1;
-
-            // 3. Simpan kembali ingatan kegagalan ini selama 24 jam ke depan
             Cache::put($penaltyKey, $totalFails, now()->addHours(24));
 
             if ($totalFails <= 5) {
@@ -67,17 +60,12 @@ class LoginRequest extends FormRequest
             } else {
                 $decaySeconds = 86400;
             }
-
-            // 5. Terapkan pukulan Rate Limiter dengan waktu yang sudah dihitung
             RateLimiter::hit($this->throttleKey(), $decaySeconds);
-            // --- AKHIR LOGIKA ESCALATING PENALTY ---
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
         }
-
-        // JIKA BERHASIL LOGIN: Bersihkan semua dosa mereka (Rate Limiter & Cache Penalti)
         RateLimiter::clear($this->throttleKey());
         Cache::forget($this->throttleKey() . '|penalties');
     }
@@ -110,6 +98,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
     }
 }

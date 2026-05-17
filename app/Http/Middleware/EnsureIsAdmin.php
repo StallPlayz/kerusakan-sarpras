@@ -10,12 +10,9 @@ class EnsureIsAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Cek apakah user sudah login DAN memiliki role 'admin'
         if ($request->user() && $request->user()->role === 'admin') {
             return $next($request); // Silakan masuk
         }
-
-        // Jika bukan admin, tolak dengan pesan error 403 (Forbidden)
         abort(403, 'Akses Ditolak. Anda bukan Admin.');
     }
 }

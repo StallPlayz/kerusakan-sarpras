@@ -1,14 +1,12 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, router } from "@inertiajs/vue3";
+import { Head, router, Link } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Swal from "sweetalert2";
 
-const showModal = ref(false); // Default: modal tertutup
+const showModal = ref(false);
+const selectedReport = ref(null);
 
-const selectedReport = ref(null); // Default: belum ada laporan yang dipilih
-
-// Fungsi untuk membuka modal dan memasukkan data laporan yang diklik
 const openDetail = (report) => {
     selectedReport.value = report;
     showModal.value = true;
@@ -53,6 +51,27 @@ const updateRole = (userId, newRole) => {
         },
     );
 };
+
+const deleteUser = (userId) => {
+    Swal.fire({
+        title: "Apakah Anda yakin?",
+        text: "Akun user ini akan dihapus secara permanen!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            router.delete(route("admin.users.destroy", userId), {
+                preserveScroll: true,
+                onSuccess: () =>
+                    showToast("User berhasil dihapus secara permanen!"),
+            });
+        }
+    });
+};
 </script>
 
 <template>
@@ -75,63 +94,74 @@ const updateRole = (userId, newRole) => {
                     </h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left text-gray-500">
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50"
-                            >
-                                <tr
-                                    v-for="report in reports"
-                                    :key="report.id"
-                                    class="border-b"
-                                >
-                                    <td class="px-6 py-4">
-                                        {{ report.user.name }}
-                                    </td>
-
-                                    <td class="px-6 py-4 font-bold">
-                                        {{ report.ruang }} - {{ report.barang }}
-                                    </td>
-
-                                    <td
-                                        class="px-6 py-4 max-w-xs truncate text-gray-500"
-                                        :title="report.deskripsi"
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
                                     >
-                                        {{ report.deskripsi }}
-                                    </td>
-
-                                    <td class="px-6 py-4"></td>
-
-                                    <td
-                                        class="px-6 py-4 flex space-x-2 items-center"
+                                        Tanggal
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
                                     >
-                                        <button
-                                            @click="openDetail(report)"
-                                            class="text-indigo-600 hover:text-indigo-900 font-bold underline text-sm mr-3"
-                                        >
-                                            Lihat Detail
-                                        </button>
-                                    </td>
+                                        Pelapor
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Ruangan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Barang
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Status
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                    >
+                                        Aksi
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr
                                     v-for="report in reports"
                                     :key="report.id"
-                                    class="bg-white border-b"
+                                    @click="openDetail(report)"
+                                    class="bg-white border-b hover:bg-indigo-50 cursor-pointer transition-colors"
                                 >
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{
+                                            new Date(
+                                                report.created_at,
+                                            ).toLocaleDateString("id-ID")
+                                        }}
+                                    </td>
+
                                     <td
-                                        class="px-6 py-4 font-medium text-gray-900"
+                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
                                     >
-                                        {{ report.user.name }}
+                                        {{
+                                            report.user?.name || "User Dihapus"
+                                        }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        {{ report.item_or_room }}
+
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ report.room }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        {{ report.description }}
+
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        {{ report.item }}
                                     </td>
-                                    <td class="px-6 py-4">
+
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <span
-                                            class="px-2 py-1 text-xs rounded-full"
+                                            class="px-2 py-1 text-xs rounded-full font-bold"
                                             :class="{
                                                 'bg-red-100 text-red-800':
                                                     report.status ===
@@ -146,9 +176,12 @@ const updateRole = (userId, newRole) => {
                                             {{ report.status }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 flex space-x-2">
+
+                                    <td
+                                        class="px-6 py-4 flex items-center space-x-2"
+                                    >
                                         <button
-                                            @click="
+                                            @click.stop="
                                                 updateStatus(
                                                     report.id,
                                                     'Diproses',
@@ -164,7 +197,7 @@ const updateRole = (userId, newRole) => {
                                         </button>
 
                                         <button
-                                            @click="
+                                            @click.stop="
                                                 updateStatus(
                                                     report.id,
                                                     'Selesai',
@@ -259,6 +292,7 @@ const updateRole = (userId, newRole) => {
                                     <th class="px-6 py-3">RFID UID</th>
                                     <th class="px-6 py-3">Role Saat Ini</th>
                                     <th class="px-6 py-3">Aksi (Ubah Role)</th>
+                                    <th class="px-6 py-3">Aksi (Hapus User)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -311,24 +345,14 @@ const updateRole = (userId, newRole) => {
                                             </option>
                                         </select>
                                     </td>
-                                    <Link
-                                        :href="
-                                            route(
-                                                'admin.users.destroy',
-                                                user.id,
-                                            )
-                                        "
-                                        method="delete"
-                                        as="button"
-                                        onclick="
-                                            return confirm(
-                                                'Apakah Anda yakin ingin menghapus user ini secara permanen?',
-                                            );
-                                        "
-                                        class="ml-2 px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-md hover:bg-red-600 transition"
-                                    >
-                                        Hapus
-                                    </Link>
+                                    <td class="px-6 py-4">
+                                        <button
+                                            @click="deleteUser(user.id)"
+                                            class="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-md hover:bg-red-600 transition"
+                                        >
+                                            Hapus
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

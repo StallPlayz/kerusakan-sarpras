@@ -50,7 +50,7 @@ Route::middleware(['auth', EnsureIsAdmin::class])->prefix('admin')->name('admin.
     Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role.update');
 
     // 4. Jalur untuk menghapus user
-    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
+    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
 });
 
 require __DIR__ . '/auth.php';

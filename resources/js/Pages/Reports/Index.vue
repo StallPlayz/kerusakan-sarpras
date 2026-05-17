@@ -43,7 +43,8 @@ defineProps({
                                     <th class="px-6 py-3 rounded-tl-lg">
                                         Tanggal Lapor
                                     </th>
-                                    <th class="px-6 py-3">Barang / Ruangan</th>
+                                    <th class="px-6 py-3">Ruangan</th>
+                                    <th class="px-6 py-3">Barang</th>
                                     <th class="px-6 py-3">Deskripsi</th>
                                     <th class="px-6 py-3 rounded-tr-lg">
                                         Status
@@ -66,7 +67,10 @@ defineProps({
                                     <td
                                         class="px-6 py-4 font-medium text-gray-900"
                                     >
-                                        {{ report.item_or_room }}
+                                        {{ report.room }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ report.item }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ report.description }}

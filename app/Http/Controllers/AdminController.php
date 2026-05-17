@@ -10,7 +10,6 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
-    // Menampilkan halaman Dashboard Admin dengan semua data
     public function index()
     {
         return Inertia::render('Admin/Dashboard', [
@@ -20,7 +19,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // Mengupdate status tiket laporan
     public function updateReportStatus(Request $request, Report $report)
     {
         $validated = $request->validate([
@@ -32,7 +30,6 @@ class AdminController extends Controller
         return redirect()->back()->with('message', 'Status tiket berhasil diperbarui!');
     }
 
-    // Mengubah role user (Admin/User)
     public function updateUserRole(Request $request, User $user)
     {
         $validated = $request->validate([

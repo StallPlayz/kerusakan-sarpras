@@ -10,7 +10,6 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class ReportController extends Controller
 {
-    // Menampilkan halaman riwayat laporan user
     public function index(Request $request)
     {
         return Inertia::render('Reports/Index', [
@@ -18,16 +17,13 @@ class ReportController extends Controller
         ]);
     }
 
-    // Menampilkan form laporan baru
     public function create()
     {
         return Inertia::render('Reports/Create');
     }
 
-    // Menyimpan laporan baru ke database
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'room' => 'required|string|max:255',
             'item' => 'required|string|max:255',
@@ -37,22 +33,19 @@ class ReportController extends Controller
 
         $imagePath = null;
 
-        // 2. Logika Pengolahan Gambar
         if ($request->hasFile('image')) {
             if (!file_exists(storage_path('app/public/reports'))) {
                 mkdir(storage_path('app/public/reports'), 0755, true);
             }
 
-            $manager = new ImageManager(new Driver());
-            $image = $manager->read($request->file('image')->getRealPath());
+            $manager = ImageManager::usingDriver(Driver::class);
+            $image = $manager->decode($request->file('image')->getRealPath());
             $imageName = 'reports/' . uniqid() . '.webp';
             $fullPath = storage_path('app/public/' . $imageName);
-            $image->toWebp(80)->save($fullPath);
-
+            $image->save($fullPath, quality: 80);
             $imagePath = $imageName;
         }
 
-        // 3. Simpan ke Database
         Report::create([
             'user_id' => auth()->id(),
             'room' => $request->room,

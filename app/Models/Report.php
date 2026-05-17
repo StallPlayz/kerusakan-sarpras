@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Report extends Model
 {
     use HasFactory;
-
-    // Kolom-kolom yang boleh diisi datanya melalui form
     protected $fillable = [
         'user_id',
         'room',
@@ -19,7 +17,6 @@ class Report extends Model
         'status',
     ];
 
-    // --- RELASI DATABASE: Laporan ini milik satu User ---
     public function user()
     {
         return $this->belongsTo(User::class);

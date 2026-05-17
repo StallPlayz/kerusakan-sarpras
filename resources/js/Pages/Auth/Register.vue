@@ -29,7 +29,7 @@ const recaptchaExpired = () => {
 };
 
 const submit = () => {
-    form.post(route('login'), {
+    form.post(route('register'), {
         onFinish: () => {
             form.reset('password', 'g-recaptcha-response');
             if (recaptchaWidget.value) {
