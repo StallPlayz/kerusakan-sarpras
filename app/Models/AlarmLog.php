@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class AlarmLog extends Model
 {
     use HasFactory;
-
-    // Tambahkan 'temperature' dan 'status' ke dalam list ini
     protected $fillable = [
         'room_name',
         'smoke_level',

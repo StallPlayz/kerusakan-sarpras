@@ -1,13 +1,13 @@
 <script setup>
-import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import vueRecaptcha from 'vue3-recaptcha2';
-import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import Checkbox from "@/Components/Checkbox.vue";
+import GuestLayout from "@/Layouts/GuestLayout.vue";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import TextInput from "@/Components/TextInput.vue";
+import vueRecaptcha from "vue3-recaptcha2";
+import { ref } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 
 defineProps({
     canResetPassword: {
@@ -23,24 +23,24 @@ const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 const recaptchaWidget = ref(null);
 
 const form = useForm({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     remember: false,
-    'g-recaptcha-response': '',
+    "g-recaptcha-response": "",
 });
 
 const recaptchaVerified = (response) => {
-    form['g-recaptcha-response'] = response;
+    form["g-recaptcha-response"] = response;
 };
 
 const recaptchaExpired = () => {
-    form['g-recaptcha-response'] = '';
+    form["g-recaptcha-response"] = "";
 };
 
 const submit = () => {
-    form.post(route('login'), {
+    form.post(route("login"), {
         onFinish: () => {
-            form.reset('password', 'g-recaptcha-response');
+            form.reset("password", "g-recaptcha-response");
             if (recaptchaWidget.value) {
                 recaptchaWidget.value.reset();
             }
@@ -92,37 +92,42 @@ const submit = () => {
             <div class="mt-4 block">
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
+                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
                 </label>
             </div>
 
             <div class="mt-4 flex flex-col items-center">
                 <vue-recaptcha
-                    ref="recaptchaWidget" :sitekey="recaptchaSiteKey"
+                    ref="recaptchaWidget"
+                    :sitekey="recaptchaSiteKey"
                     @verify="recaptchaVerified"
                     @expire="recaptchaExpired"
                 />
-                <InputError class="mt-2" :message="form.errors['g-recaptcha-response']" />
+                <InputError
+                    class="mt-2"
+                    :message="form.errors['g-recaptcha-response']"
+                />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div
+                class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4"
+            >
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="text-xs text-slate-500 hover:text-slate-900 transition-colors"
                 >
-                    Forgot your password?
+                    Lupa password Anda?
                 </Link>
 
-                <PrimaryButton
-                    class="ms-4"
+                <button
+                    type="submit"
+                    class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all shadow-sm disabled:opacity-50"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Log in
-                </PrimaryButton>
+                    Masuk Aplikasi
+                </button>
             </div>
         </form>
     </GuestLayout>

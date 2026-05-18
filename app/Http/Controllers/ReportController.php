@@ -25,10 +25,11 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'room' => 'required|string|max:255',
-            'item' => 'required|string|max:255',
+            'category'    => 'required|string|max:255',
+            'room_name'   => 'required|string|max:255',
+            'item_name'   => 'required|string|max:255',
             'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
         $imagePath = null;
@@ -46,14 +47,17 @@ class ReportController extends Controller
             $imagePath = $imageName;
         }
 
-        Report::create([
-            'user_id' => auth()->id(),
-            'room' => $request->room,
-            'item' => $request->item,
+        $report = Report::create([
+            'user_id'     => auth()->id(),
+            'category'    => $request->category,
+            'room_name'   => $request->room_name,
+            'item_name'   => $request->item_name,
             'description' => $request->description,
-            'image_path' => $imagePath,
-            'status' => 'Belum Dikonfirmasi',
+            'image_path'  => $imagePath,
+            'status'      => 'Belum Dikonfirmasi'
         ]);
+
+        broadcast(new \App\Events\ReportCreated($report));
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil dibuat!');
     }

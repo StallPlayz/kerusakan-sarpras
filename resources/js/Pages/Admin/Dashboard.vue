@@ -1,8 +1,19 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router, Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import Swal from "sweetalert2";
+import {
+    FileText,
+    Clock,
+    Users,
+    X,
+    CreditCard,
+    Activity,
+    Ticket,
+    CheckCircle2,
+    AlertTriangle,
+} from "@lucide/vue";
 
 const showModal = ref(false);
 const selectedReport = ref(null);
@@ -16,6 +27,19 @@ const props = defineProps({
     reports: Array,
     users: Array,
     alarm_logs: Array,
+});
+
+const localReports = ref(props.reports || []);
+
+onMounted(() => {
+    window.Echo.channel("reports").listen("ReportCreated", (e) => {
+        localReports.value.unshift(e.report);
+        alert(`Laporan Baru: ${e.report.item_name} di ${e.report.room_name}!`);
+    });
+});
+
+onUnmounted(() => {
+    window.Echo.leaveChannel("reports");
 });
 
 const showToast = (message) => {
@@ -75,141 +99,358 @@ const deleteUser = (userId) => {
 </script>
 
 <template>
-    <Head title="Dashboard Admin" />
-
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Dashboard Admin (Sarpras & IoT)
-            </h2>
-        </template>
+        <Head title="Admin Dashboard" />
 
-        <div class="py-12 space-y-6">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="py-8">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div
+                        class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p
+                                    class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >
+                                    Total Laporan Masuk
+                                </p>
+                                <h3 class="text-3xl font-bold text-slate-800">
+                                    {{ reports.length }}
+                                </h3>
+                            </div>
+                            <div
+                                class="p-3 bg-blue-50 text-blue-600 rounded-lg"
+                            >
+                                <FileText class="w-6 h-6" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p
+                                    class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >
+                                    Menunggu Penanganan
+                                </p>
+                                <h3 class="text-3xl font-bold text-slate-800">
+                                    {{
+                                        reports.filter(
+                                            (r) => r.status === "pending",
+                                        ).length
+                                    }}
+                                </h3>
+                            </div>
+                            <div
+                                class="p-3 bg-amber-50 text-amber-600 rounded-lg"
+                            >
+                                <Clock class="w-6 h-6" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 transition-all duration-200 hover:shadow-md"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p
+                                    class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >
+                                    Total Pengguna Aktif
+                                </p>
+                                <h3 class="text-3xl font-bold text-slate-800">
+                                    {{ users.length }}
+                                </h3>
+                            </div>
+                            <div
+                                class="p-3 bg-emerald-50 text-emerald-600 rounded-lg"
+                            >
+                                <Users class="w-6 h-6" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div
-                    class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6 border-l-4 border-blue-500"
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
                 >
-                    <h3 class="text-lg font-bold mb-4">
-                        Daftar Tiket Laporan Kerusakan
-                    </h3>
+                    <div class="px-6 py-5 border-b border-slate-200 bg-white">
+                        <h2
+                            class="text-lg font-semibold text-slate-800 flex items-center gap-2"
+                        >
+                            <Activity class="w-5 h-5 text-black" /> Log Sensor
+                            Bahaya (IoT)
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Riwayat deteksi suhu ekstrem dan asap dari perangkat
+                            ESP32.
+                        </p>
+                    </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500">
-                            <thead class="bg-gray-50 border-b border-gray-200">
-                                <tr>
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50/50 border-b border-slate-200"
+                                >
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                     >
-                                        Tanggal
+                                        Waktu Kejadian
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
-                                    >
-                                        Pelapor
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                     >
                                         Ruangan
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                     >
-                                        Barang
+                                        Level Asap
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Suhu
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                     >
                                         Status
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-left text-xs font-extrabold text-gray-500 uppercase tracking-wider"
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
                                     >
-                                        Aksi
+                                        Dimatikan Oleh (RFID)
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-200">
                                 <tr
-                                    v-for="report in reports"
-                                    :key="report.id"
-                                    @click="openDetail(report)"
-                                    class="bg-white border-b hover:bg-indigo-50 cursor-pointer transition-colors"
+                                    v-for="log in alarm_logs"
+                                    :key="log.id"
+                                    class="hover:bg-slate-50 transition-colors"
                                 >
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td
+                                        class="px-6 py-4 text-sm text-slate-700 whitespace-nowrap"
+                                    >
                                         {{
                                             new Date(
-                                                report.created_at,
-                                            ).toLocaleDateString("id-ID")
+                                                log.created_at,
+                                            ).toLocaleString("id-ID")
                                         }}
                                     </td>
-
                                     <td
-                                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                                        class="px-6 py-4 text-sm font-medium text-slate-900"
+                                    >
+                                        {{ log.room_name }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-sm text-slate-700 font-mono"
+                                    >
+                                        {{ log.smoke_level }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-sm text-slate-700 font-mono"
+                                    >
+                                        {{ log.temperature }} °C
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span
+                                            v-if="log.status === 'BAHAYA'"
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200"
+                                        >
+                                            Bahaya Aktif
+                                        </span>
+                                        <span
+                                            v-else
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                        >
+                                            Telah Dimatikan
+                                        </span>
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-sm text-slate-500 font-mono"
+                                    >
+                                        {{
+                                            log.resolved_by_rfid
+                                                ? log.resolved_by_rfid
+                                                : "-"
+                                        }}
+                                    </td>
+                                </tr>
+                                <tr v-if="alarm_logs.length === 0">
+                                    <td
+                                        colspan="6"
+                                        class="px-6 py-8 text-center text-slate-500 text-sm"
+                                    >
+                                        Belum ada log sensor yang terekam.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                >
+                    <div class="px-6 py-5 border-b border-slate-200 bg-white">
+                        <h2
+                            class="text-lg font-semibold text-slate-800 flex items-center gap-2"
+                        >
+                            <Ticket class="w-5 h-5 text-black" /> Manajemen
+                            Tiket Kerusakan
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Daftar laporan kerusakan fasilitas dari pengguna
+                            (Klik baris untuk melihat detail).
+                        </p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50/50 border-b border-slate-200"
+                                >
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Waktu
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Pelapor
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Kategori
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Lokasi Ruangan
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Nama Barang
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Status Tiket
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr
+                                    v-for="report in localReports"
+                                    :key="report.id"
+                                    @click="openDetail(report)"
+                                    class="hover:bg-slate-50 transition-colors cursor-pointer"
+                                >
+                                    <td
+                                        class="px-6 py-4 text-sm text-slate-500 whitespace-nowrap"
+                                    >
+                                        {{
+                                            report.created_at
+                                                ? new Date(
+                                                      report.created_at,
+                                                  ).toLocaleDateString("id-ID")
+                                                : "-"
+                                        }}
+                                    </td>
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium text-slate-900"
                                     >
                                         {{
                                             report.user?.name || "User Dihapus"
                                         }}
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ report.room }}
-                                    </td>
-
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {{ report.item }}
-                                    </td>
-
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4 text-sm">
                                         <span
-                                            class="px-2 py-1 text-xs rounded-full font-bold"
-                                            :class="{
-                                                'bg-red-100 text-red-800':
-                                                    report.status ===
-                                                    'Belum Dikonfirmasi',
-                                                'bg-yellow-100 text-yellow-800':
-                                                    report.status ===
-                                                    'Diproses',
-                                                'bg-green-100 text-green-800':
-                                                    report.status === 'Selesai',
-                                            }"
+                                            class="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200"
                                         >
-                                            {{ report.status }}
+                                            {{ report.category || "-" }}
                                         </span>
                                     </td>
 
                                     <td
-                                        class="px-6 py-4 flex items-center space-x-2"
+                                        class="px-6 py-4 text-sm text-slate-700"
                                     >
-                                        <button
-                                            @click.stop="
-                                                updateStatus(
-                                                    report.id,
-                                                    'Diproses',
-                                                )
-                                            "
-                                            :disabled="
-                                                report.status === 'Diproses' ||
-                                                report.status === 'Selesai'
-                                            "
-                                            class="px-3 py-1.5 bg-yellow-500 text-white text-xs font-bold rounded-md shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            Proses
-                                        </button>
+                                        {{ report.room_name || "-" }}
+                                    </td>
 
-                                        <button
-                                            @click.stop="
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium text-slate-700 max-w-xs truncate"
+                                        :title="report.item_name"
+                                    >
+                                        {{ report.item_name || "-" }}
+                                    </td>
+
+                                    <td class="px-6 py-4">
+                                        <select
+                                            @change="
                                                 updateStatus(
                                                     report.id,
-                                                    'Selesai',
+                                                    $event.target.value,
                                                 )
                                             "
-                                            :disabled="
-                                                report.status === 'Selesai'
-                                            "
-                                            class="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-all"
+                                            @click.stop
+                                            class="text-sm border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors cursor-pointer"
+                                            :class="{
+                                                'bg-amber-50 text-amber-800 border-amber-200':
+                                                    report.status ===
+                                                    'Belum Dikonfirmasi',
+                                                'bg-blue-50 text-blue-800 border-blue-200':
+                                                    report.status ===
+                                                    'Diproses',
+                                                'bg-emerald-50 text-emerald-800 border-emerald-200':
+                                                    report.status === 'Selesai',
+                                            }"
                                         >
-                                            Selesai
-                                        </button>
+                                            <option
+                                                value="Belum Dikonfirmasi"
+                                                :selected="
+                                                    report.status ===
+                                                    'Belum Dikonfirmasi'
+                                                "
+                                            >
+                                                Menunggu
+                                            </option>
+                                            <option
+                                                value="Diproses"
+                                                :selected="
+                                                    report.status === 'Diproses'
+                                                "
+                                            >
+                                                Diproses
+                                            </option>
+                                            <option
+                                                value="Selesai"
+                                                :selected="
+                                                    report.status === 'Selesai'
+                                                "
+                                            >
+                                                Selesai
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr v-if="localReports.length === 0">
+                                    <td
+                                        colspan="6"
+                                        class="px-6 py-8 text-center text-slate-500 text-sm"
+                                    >
+                                        Belum ada tiket laporan.
                                     </td>
                                 </tr>
                             </tbody>
@@ -218,104 +459,87 @@ const deleteUser = (userId) => {
                 </div>
 
                 <div
-                    class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6 border-l-4 border-red-500"
+                    class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
                 >
-                    <h3 class="text-lg font-bold mb-4 text-red-600">
-                        Riwayat Alarm Kebakaran ESP32 (F205)
-                    </h3>
+                    <div class="px-6 py-5 border-b border-slate-200 bg-white">
+                        <h2
+                            class="text-lg font-semibold text-slate-800 flex items-center gap-2"
+                        >
+                            <Users class="w-5 h-5 text-black" /> Manajemen
+                            Pengguna
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Atur hak akses, akun, dan kartu RFID pengguna
+                            sistem.
+                        </p>
+                    </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500">
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50"
-                            >
-                                <tr>
-                                    <th class="px-6 py-3">Ruangan</th>
-                                    <th class="px-6 py-3">Level Asap</th>
-                                    <th class="px-6 py-3">Waktu Kejadian</th>
-                                    <th class="px-6 py-3">Waktu Dipadamkan</th>
-                                    <th class="px-6 py-3">
-                                        Dimatikan Oleh (RFID)
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-slate-50/50 border-b border-slate-200"
+                                >
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Nama
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Email
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        RFID UID
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
+                                        Hak Akses
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right"
+                                    >
+                                        Aksi
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-200">
                                 <tr
-                                    v-for="log in alarm_logs"
-                                    :key="log.id"
-                                    class="bg-white border-b"
-                                >
-                                    <td class="px-6 py-4">
-                                        {{ log.room_name }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ log.smoke_level }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{
-                                            new Date(
-                                                log.triggered_at,
-                                            ).toLocaleString()
-                                        }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{
-                                            log.resolved_at
-                                                ? new Date(
-                                                      log.resolved_at,
-                                                  ).toLocaleString()
-                                                : "BELUM PADAM!"
-                                        }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ log.resolved_by_rfid || "-" }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div
-                    class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-purple-500"
-                >
-                    <h3 class="text-lg font-bold mb-4">
-                        Manajemen Role & User
-                    </h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500">
-                            <thead
-                                class="text-xs text-gray-700 uppercase bg-gray-50"
-                            >
-                                <tr>
-                                    <th class="px-6 py-3">Nama</th>
-                                    <th class="px-6 py-3">Email</th>
-                                    <th class="px-6 py-3">RFID UID</th>
-                                    <th class="px-6 py-3">Role Saat Ini</th>
-                                    <th class="px-6 py-3">Aksi (Ubah Role)</th>
-                                    <th class="px-6 py-3">Aksi (Hapus User)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="user in users"
+                                    v-for="user in users || []"
                                     :key="user.id"
-                                    class="bg-white border-b"
+                                    class="hover:bg-slate-50 transition-colors"
                                 >
-                                    <td class="px-6 py-4">{{ user.name }}</td>
-                                    <td class="px-6 py-4">{{ user.email }}</td>
-                                    <td class="px-6 py-4">
-                                        {{ user.rfid_uid || "Belum Terdaftar" }}
+                                    <td
+                                        class="px-6 py-4 text-sm font-medium text-slate-900"
+                                    >
+                                        {{ user.name }}
                                     </td>
                                     <td
-                                        class="px-6 py-4 font-bold uppercase"
-                                        :class="
-                                            user.role === 'admin'
-                                                ? 'text-purple-600'
-                                                : 'text-gray-600'
-                                        "
+                                        class="px-6 py-4 text-sm text-slate-600"
                                     >
-                                        {{ user.role }}
+                                        {{ user.email }}
                                     </td>
+
+                                    <td class="px-6 py-4 text-sm font-mono">
+                                        <span
+                                            v-if="user.rfid_uid"
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"
+                                        >
+                                            <CreditCard
+                                                class="w-3.5 h-3.5 text-slate-500"
+                                            />
+                                            {{ user.rfid_uid }}
+                                        </span>
+                                        <span
+                                            v-else
+                                            class="text-slate-400 italic text-xs"
+                                            >Belum Terdaftar</span
+                                        >
+                                    </td>
+
                                     <td class="px-6 py-4">
                                         <select
                                             @change="
@@ -324,34 +548,54 @@ const deleteUser = (userId) => {
                                                     $event.target.value,
                                                 )
                                             "
-                                            class="text-sm border-gray-300 rounded-md"
+                                            :disabled="
+                                                user.id ===
+                                                $page.props.auth.user.id
+                                            "
+                                            class="text-sm border-slate-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:bg-slate-100"
                                         >
-                                            <option value="" disabled selected>
-                                                Ubah Role...
-                                            </option>
                                             <option
                                                 value="user"
-                                                :disabled="user.role === 'user'"
+                                                :selected="user.role === 'user'"
                                             >
-                                                Jadikan User
+                                                Pengguna Biasa
                                             </option>
                                             <option
                                                 value="admin"
-                                                :disabled="
+                                                :selected="
                                                     user.role === 'admin'
                                                 "
                                             >
-                                                Jadikan Admin
+                                                Administrator
                                             </option>
                                         </select>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td
+                                        class="px-6 py-4 text-right text-sm font-medium"
+                                    >
                                         <button
+                                            v-if="
+                                                user.id !==
+                                                $page.props.auth.user.id
+                                            "
                                             @click="deleteUser(user.id)"
-                                            class="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-md hover:bg-red-600 transition"
+                                            class="text-red-600 hover:text-red-800 transition-colors"
                                         >
                                             Hapus
                                         </button>
+                                        <span
+                                            v-else
+                                            class="text-slate-400 italic text-xs"
+                                            >Anda Sendiri</span
+                                        >
+                                    </td>
+                                </tr>
+                                <tr v-if="(users || []).length === 0">
+                                    <td
+                                        colspan="5"
+                                        class="px-6 py-8 text-center text-slate-500 text-sm"
+                                    >
+                                        Belum ada pengguna terdaftar.
                                     </td>
                                 </tr>
                             </tbody>
@@ -360,94 +604,121 @@ const deleteUser = (userId) => {
                 </div>
             </div>
         </div>
+
         <div
             v-if="showModal"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm transition-opacity"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
             <div
-                class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative shadow-2xl"
+                class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                @click="showModal = false"
+            ></div>
+
+            <div
+                class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden w-full max-w-2xl relative z-10 transform transition-all"
             >
-                <button
-                    @click="showModal = false"
-                    class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-3xl font-bold leading-none"
-                >
-                    &times;
-                </button>
-
-                <h2
-                    class="text-2xl font-extrabold mb-4 border-b-2 pb-2 text-gray-800"
-                >
-                    Detail Laporan Kerusakan
-                </h2>
-
                 <div
-                    class="space-y-4 text-sm text-gray-700"
-                    v-if="selectedReport"
+                    class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50"
                 >
-                    <div
-                        class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border"
+                    <h3 class="text-lg font-bold text-slate-800">
+                        Detail Laporan
+                    </h3>
+                    <button
+                        @click="showModal = false"
+                        class="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
                     >
-                        <p>
-                            <span class="font-bold text-gray-900 block"
-                                >Nama Pelapor:</span
-                            >
+                        <X class="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div class="p-6 max-h-[70vh] overflow-y-auto space-y-5">
+                    <div>
+                        <span
+                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                            >Pelapor</span
+                        >
+                        <p class="text-slate-900 font-medium">
                             {{ selectedReport.user.name }}
-                        </p>
-                        <p>
-                            <span class="font-bold text-gray-900 block"
-                                >Status Saat Ini:</span
+                            <span class="text-slate-500 font-normal"
+                                >({{ selectedReport.user.email }})</span
                             >
-                            {{ selectedReport.status }}
                         </p>
-                        <p>
-                            <span class="font-bold text-gray-900 block"
-                                >Ruangan:</span
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >Kategori</span
                             >
-                            {{ selectedReport.room }}
-                        </p>
-                        <p>
-                            <span class="font-bold text-gray-900 block"
-                                >Barang:</span
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
                             >
-                            {{ selectedReport.item }}
+                                {{ selectedReport.category }}
+                            </span>
+                        </div>
+                        <div>
+                            <span
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >Lokasi Ruangan</span
+                            >
+                            <p class="text-slate-900">
+                                {{ selectedReport.room_name }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span
+                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                            >Nama Barang</span
+                        >
+                        <p class="text-slate-900 font-medium">
+                            {{ selectedReport?.item_name || "-" }}
                         </p>
                     </div>
 
                     <div>
-                        <span class="font-bold text-gray-900 block mb-1"
-                            >Deskripsi Lengkap:</span
+                        <span
+                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                            >Deskripsi Detail</span
                         >
                         <p
-                            class="bg-gray-100 p-4 rounded-lg border text-gray-800 whitespace-pre-wrap leading-relaxed"
+                            class="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 whitespace-pre-wrap leading-relaxed"
                         >
                             {{ selectedReport.description }}
                         </p>
                     </div>
 
-                    <div
-                        v-if="selectedReport.image_path"
-                        class="mt-4 border-t pt-4"
-                    >
-                        <span class="font-bold text-gray-900 block mb-2"
-                            >Foto Bukti Keluhan:</span
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <span
+                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3"
+                            >Foto Bukti Keluhan</span
                         >
-                        <img
-                            :src="'/storage/' + selectedReport.image_path"
-                            alt="Foto Bukti"
-                            class="rounded-lg max-h-96 object-contain w-full bg-gray-200 border-2 border-dashed border-gray-300"
-                        />
-                    </div>
-                    <div v-else class="mt-4 border-t pt-4">
-                        <p class="text-gray-500 italic">
-                            Pelapor tidak melampirkan foto bukti.
-                        </p>
+                        <div v-if="selectedReport.image_path">
+                            <img
+                                :src="'/storage/' + selectedReport.image_path"
+                                alt="Foto Bukti"
+                                class="rounded-lg max-h-96 w-full object-contain bg-slate-100 border border-slate-200"
+                            />
+                        </div>
+                        <div
+                            v-else
+                            class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-center"
+                        >
+                            <p class="text-slate-500 italic text-sm">
+                                Pelapor tidak melampirkan foto bukti.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end">
+                <div
+                    class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end"
+                >
                     <button
                         @click="showModal = false"
-                        class="px-5 py-2.5 bg-gray-800 text-white rounded-lg hover:bg-gray-700 font-bold transition-colors"
+                        class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm"
                     >
                         Tutup Jendela
                     </button>

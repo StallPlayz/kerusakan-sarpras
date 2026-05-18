@@ -17,8 +17,13 @@ Route::get('/', function () {
     ]);
 });
 
-// Jalur bawaan Breeze (Homepage (WIP))
 Route::get('/dashboard', function () {
+    /** @var \App\Models\User $user */
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -27,29 +32,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // 1. Jalur untuk melihat riwayat laporan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    // 2. Jalur untuk membuka halaman form laporan baru
     Route::get('/reports/create', [ReportController::class, 'create'])->name('reports.create');
-    // 3. Jalur untuk memproses form
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
 });
 
 // --- JALUR KHUSUS ADMIN ---
-// Memasang 2 gembok: harus 'auth' (login) dan harus lewat 'EnsureIsAdmin'
 Route::middleware(['auth', EnsureIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
-
-    // 1. Halaman Dashboard Admin (URL: /admin/dashboard)
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-
-    // 2. Fungsi Update Status Tiket Laporan
     Route::patch('/reports/{report}', [AdminController::class, 'updateReportStatus'])->name('reports.update');
-
-    // 3. Fungsi Mengubah Role User
     Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role.update');
-
-    // 4. Jalur untuk menghapus user
     Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
 });
 

@@ -27,6 +27,8 @@ class AdminController extends Controller
 
         $report->update(['status' => $validated['status']]);
 
+        broadcast(new \App\Events\ReportUpdated($report));
+
         return redirect()->back()->with('message', 'Status tiket berhasil diperbarui!');
     }
 

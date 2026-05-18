@@ -6,32 +6,38 @@ import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { Link } from "@inertiajs/vue3";
+import ProfileSettingsModal from "@/Components/ProfileSettingsModal.vue";
+import { ChevronLeft, ChevronDown } from "@lucide/vue";
 
 const showingNavigationDropdown = ref(false);
+const showProfileModal = ref(false);
 </script>
 
 <template>
     <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-                <!-- Primary Navigation Menu -->
+        <div class="min-h-screen bg-slate-50">
+            <nav
+                class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm transition-all duration-300"
+            >
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
                         <div class="flex">
-                            <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
+                                <Link
+                                    :href="route('dashboard')"
+                                    class="transition-transform duration-200 hover:scale-105"
+                                >
                                     <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
+                                        class="block h-9 w-auto fill-current text-slate-800"
                                     />
                                 </Link>
                             </div>
 
-                            <!-- Navigation Links -->
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
+                                    v-if="$page.props.auth.user.role === 'user'"
                                     :href="route('dashboard')"
                                     :active="route().current('dashboard')"
                                 >
@@ -66,59 +72,78 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
-                                    <template #trigger>
+                                    <template #trigger="{ open }">
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                class="inline-flex items-center rounded-md bg-transparent px-3 py-2 text-sm font-medium leading-4 text-slate-600 transition duration-200 ease-in-out hover:text-slate-900 hover:bg-slate-100 focus:outline-none"
                                             >
                                                 {{ $page.props.auth.user.name }}
 
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
+                                                <ChevronDown
+                                                    class="-me-0.5 ms-2 h-4 w-4 transition-transform duration-200"
+                                                    :class="{
+                                                        '-rotate-180': open,
+                                                    }"
+                                                />
                                             </button>
                                         </span>
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
+                                        <div class="py-1 relative">
+                                            <button
+                                                @click.stop="
+                                                    showProfileModal =
+                                                        !showProfileModal
+                                                "
+                                                class="flex justify-between items-center w-full px-4 py-2 text-start text-sm leading-5 text-slate-700 transition duration-150 ease-in-out hover:bg-slate-100 focus:bg-slate-100 focus:outline-none"
+                                                :class="{
+                                                    'bg-slate-50 font-medium':
+                                                        showProfileModal,
+                                                }"
+                                            >
+                                                <span>Profile Settings</span>
+
+                                                <ChevronLeft
+                                                    class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                                                    :class="{
+                                                        '-rotate-180':
+                                                            showProfileModal,
+                                                    }"
+                                                />
+                                            </button>
+
+                                            <DropdownLink
+                                                :href="route('logout')"
+                                                method="post"
+                                                as="button"
+                                                class="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                Log Out
+                                            </DropdownLink>
+
+                                            <ProfileSettingsModal
+                                                :show="showProfileModal"
+                                                @close="
+                                                    showProfileModal = false
+                                                "
+                                            />
+                                        </div>
                                     </template>
                                 </Dropdown>
                             </div>
                         </div>
 
-                        <!-- Hamburger -->
                         <div class="-me-2 flex items-center sm:hidden">
                             <button
                                 @click="
                                     showingNavigationDropdown =
                                         !showingNavigationDropdown
                                 "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
+                                class="inline-flex items-center justify-center rounded-md p-2 text-slate-400 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-500 focus:bg-slate-100 focus:text-slate-500 focus:outline-none"
                             >
                                 <svg
                                     class="h-6 w-6"
@@ -154,16 +179,16 @@ const showingNavigationDropdown = ref(false);
                     </div>
                 </div>
 
-                <!-- Responsive Navigation Menu -->
                 <div
                     :class="{
                         block: showingNavigationDropdown,
                         hidden: !showingNavigationDropdown,
                     }"
-                    class="sm:hidden"
+                    class="sm:hidden bg-white border-t border-slate-200"
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
+                            v-if="$page.props.auth.user.role === 'user'"
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                         >
@@ -171,13 +196,12 @@ const showingNavigationDropdown = ref(false);
                         </ResponsiveNavLink>
                     </div>
 
-                    <!-- Responsive Settings Options -->
-                    <div class="border-t border-gray-200 pb-1 pt-4">
+                    <div class="border-t border-slate-200 pb-1 pt-4">
                         <div class="px-4">
-                            <div class="text-base font-medium text-gray-800">
+                            <div class="text-base font-medium text-slate-800">
                                 {{ $page.props.auth.user.name }}
                             </div>
-                            <div class="text-sm font-medium text-gray-500">
+                            <div class="text-sm font-medium text-slate-500">
                                 {{ $page.props.auth.user.email }}
                             </div>
                         </div>
@@ -190,6 +214,7 @@ const showingNavigationDropdown = ref(false);
                                 :href="route('logout')"
                                 method="post"
                                 as="button"
+                                class="text-red-600"
                             >
                                 Log Out
                             </ResponsiveNavLink>
@@ -198,15 +223,16 @@ const showingNavigationDropdown = ref(false);
                 </div>
             </nav>
 
-            <!-- Page Heading -->
-            <header class="bg-white shadow" v-if="$slots.header">
+            <header
+                class="bg-white shadow-sm border-b border-slate-200 relative z-10"
+                v-if="$slots.header"
+            >
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main>
+            <main class="py-8">
                 <slot />
             </main>
         </div>

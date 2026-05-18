@@ -15,9 +15,11 @@ namespace App\Models{
 /**
  * @property int $id
  * @property string $room_name
- * @property string|null $smoke_level
+ * @property int $smoke_level
+ * @property float $temperature
+ * @property string $status
  * @property string|null $resolved_by_rfid
- * @property \Illuminate\Support\Carbon $triggered_at
+ * @property \Illuminate\Support\Carbon|null $triggered_at
  * @property \Illuminate\Support\Carbon|null $resolved_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -30,6 +32,8 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereResolvedByRfid($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereRoomName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereSmokeLevel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereTemperature($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereTriggeredAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AlarmLog whereUpdatedAt($value)
  */

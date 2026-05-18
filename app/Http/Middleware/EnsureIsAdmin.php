@@ -11,7 +11,7 @@ class EnsureIsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user() && $request->user()->role === 'admin') {
-            return $next($request); // Silakan masuk
+            return $next($request);
         }
         abort(403, 'Akses Ditolak. Anda bukan Admin.');
     }

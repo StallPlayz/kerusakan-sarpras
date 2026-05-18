@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::create('alarm_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('room_name')->default('F205'); // Nama Ruangan
-            $table->integer('smoke_level');               // Kadar Asap
-            $table->float('temperature');                 // Suhu (Float karena ada koma)
-            $table->string('status');                     // Status bahaya/aman
-            $table->string('resolved_by_rfid')->nullable(); // UID Kartu (Bisa kosong)
-            $table->timestamp('triggered_at')->nullable();  // Waktu kejadian
-            $table->timestamp('resolved_at')->nullable();   // Waktu dimatikan
+            $table->string('room_name')->default('F205');
+            $table->integer('smoke_level');
+            $table->float('temperature');
+            $table->string('status');
+            $table->string('resolved_by_rfid')->nullable();
+            $table->timestamp('triggered_at')->nullable();
+            $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
         });
     }

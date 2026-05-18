@@ -10,8 +10,9 @@ class Report extends Model
     use HasFactory;
     protected $fillable = [
         'user_id',
-        'room',
-        'item',
+        'category',
+        'room_name',
+        'item_name',
         'description',
         'image_path',
         'status',
