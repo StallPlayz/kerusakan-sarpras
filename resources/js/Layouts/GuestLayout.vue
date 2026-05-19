@@ -5,7 +5,7 @@ import { Wrench } from "@lucide/vue";
 
 <template>
     <div
-        class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-slate-50 antialiased relative overflow-hidden text-slate-800"
+        class="min-h-screen flex flex-col justify-center items-center p-10 bg-slate-50 antialiased relative overflow-hidden text-slate-800"
     >
         <div
             class="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-60"

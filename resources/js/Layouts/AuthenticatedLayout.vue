@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronDown } from "@lucide/vue";
 
 const showingNavigationDropdown = ref(false);
 const showProfileModal = ref(false);
+const showMobileProfileModal = ref(false);
 </script>
 
 <template>
@@ -23,14 +24,11 @@ const showProfileModal = ref(false);
                     <div class="flex h-16 justify-between">
                         <div class="flex">
                             <div class="flex shrink-0 items-center">
-                                <Link
-                                    :href="route('dashboard')"
-                                    class="transition-transform duration-200 hover:scale-105"
-                                >
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-slate-800"
-                                    />
-                                </Link>
+                                <div class="flex shrink-0 items-center">
+                                    <Link :href="route('dashboard')">
+                                        <ApplicationLogo />
+                                    </Link>
+                                </div>
                             </div>
 
                             <div
@@ -141,7 +139,8 @@ const showProfileModal = ref(false);
                             <button
                                 @click="
                                     showingNavigationDropdown =
-                                        !showingNavigationDropdown
+                                        !showingNavigationDropdown;
+                                    showMobileProfileModal = false;
                                 "
                                 class="inline-flex items-center justify-center rounded-md p-2 text-slate-400 transition duration-150 ease-in-out hover:bg-slate-100 hover:text-slate-500 focus:bg-slate-100 focus:text-slate-500 focus:outline-none"
                             >
@@ -179,49 +178,126 @@ const showProfileModal = ref(false);
                     </div>
                 </div>
 
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden bg-white border-t border-slate-200"
+                <Transition
+                    enter-active-class="transition-all ease-out duration-300 overflow-hidden"
+                    enter-from-class="opacity-0 max-h-0"
+                    enter-to-class="opacity-100 max-h-[800px]"
+                    leave-active-class="transition-all ease-in duration-200 overflow-hidden"
+                    leave-from-class="opacity-100 max-h-[800px]"
+                    leave-to-class="opacity-0 max-h-0"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            v-if="$page.props.auth.user.role === 'user'"
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div class="border-t border-slate-200 pb-1 pt-4">
-                        <div class="px-4">
-                            <div class="text-base font-medium text-slate-800">
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-slate-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                                class="text-red-600"
+                    <div
+                        v-show="showingNavigationDropdown"
+                        class="sm:hidden bg-white border-t border-slate-200 absolute w-full shadow-lg"
+                    >
+                        <div class="space-y-1 pb-3 pt-2">
+                            <template
+                                v-if="$page.props.auth.user.role === 'user'"
                             >
-                                Log Out
-                            </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    :href="route('dashboard')"
+                                    :active="route().current('dashboard')"
+                                >
+                                    Dashboard
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    :href="route('reports.index')"
+                                    :active="route().current('reports.index')"
+                                >
+                                    Riwayat Laporan
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    :href="route('reports.create')"
+                                    :active="route().current('reports.create')"
+                                >
+                                    Buat Laporan Baru
+                                </ResponsiveNavLink>
+                            </template>
+
+                            <template
+                                v-if="$page.props.auth.user.role === 'admin'"
+                            >
+                                <ResponsiveNavLink
+                                    :href="route('admin.dashboard')"
+                                    :active="route().current('admin.dashboard')"
+                                >
+                                    Panel Admin
+                                </ResponsiveNavLink>
+                            </template>
+                        </div>
+
+                        <div class="border-t border-slate-200 pb-1 pt-4">
+                            <div class="px-4">
+                                <div
+                                    class="text-base font-medium text-slate-800"
+                                >
+                                    {{ $page.props.auth.user.name }}
+                                </div>
+                                <div class="text-sm font-medium text-slate-500">
+                                    {{ $page.props.auth.user.email }}
+                                </div>
+                            </div>
+
+                            <div class="mt-3 space-y-1 overflow-hidden">
+                                <button
+                                    @click.stop="
+                                        showMobileProfileModal =
+                                            !showMobileProfileModal
+                                    "
+                                    class="flex w-full items-center justify-between ps-3 pe-4 py-2 border-l-4 text-start text-base font-medium transition duration-150 ease-in-out focus:outline-none"
+                                    :class="
+                                        showMobileProfileModal
+                                            ? 'border-slate-300 bg-slate-50 text-slate-800'
+                                            : 'border-transparent text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800'
+                                    "
+                                >
+                                    <span>Profile Settings</span>
+
+                                    <ChevronDown
+                                        class="h-4 w-4 transition-transform duration-200"
+                                        :class="{
+                                            '-rotate-180':
+                                                showMobileProfileModal,
+                                        }"
+                                    />
+                                </button>
+
+                                <ProfileSettingsModal
+                                    :show="showMobileProfileModal"
+                                    :isMobile="true"
+                                    @close="showMobileProfileModal = false"
+                                />
+                                <ResponsiveNavLink
+                                    :href="route('logout')"
+                                    method="post"
+                                    as="button"
+                                    class="text-red-600"
+                                >
+                                    Log Out
+                                </ResponsiveNavLink>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </Transition>
             </nav>
+
+            <Transition
+                enter-active-class="transition-opacity ease-out duration-300"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition-opacity ease-in duration-200"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div
+                    v-if="showingNavigationDropdown"
+                    @click="
+                        showingNavigationDropdown = false;
+                        showMobileProfileModal = false;
+                    "
+                    class="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm sm:hidden"
+                ></div>
+            </Transition>
 
             <header
                 class="bg-white shadow-sm border-b border-slate-200 relative z-10"

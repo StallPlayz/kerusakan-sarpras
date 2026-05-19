@@ -55,6 +55,11 @@ const showToast = (message) => {
 };
 
 const updateStatus = (reportId, newStatus) => {
+    const index = localReports.value.findIndex(r => r.id === reportId);
+    if (index !== -1) {
+        localReports.value[index].status = newStatus;
+    }
+
     router.patch(
         route("admin.reports.update", reportId),
         { status: newStatus },
@@ -605,125 +610,153 @@ const deleteUser = (userId) => {
             </div>
         </div>
 
-        <div
-            v-if="showModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        <Transition
+            enter-active-class="transition-opacity ease-out duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity ease-in duration-150"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
         >
             <div
-                class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                v-if="showModal"
+                class="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm"
                 @click="showModal = false"
             ></div>
+        </Transition>
 
+        <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+            leave-to-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        >
             <div
-                class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden w-full max-w-2xl relative z-10 transform transition-all"
+                v-if="showModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >
                 <div
-                    class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50"
+                    class="bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden w-full max-w-2xl relative pointer-events-auto"
                 >
-                    <h3 class="text-lg font-bold text-slate-800">
-                        Detail Laporan
-                    </h3>
-                    <button
-                        @click="showModal = false"
-                        class="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
+                    <div
+                        class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50"
                     >
-                        <X class="w-5 h-5" />
-                    </button>
-                </div>
-
-                <div class="p-6 max-h-[70vh] overflow-y-auto space-y-5">
-                    <div>
-                        <span
-                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
-                            >Pelapor</span
+                        <h3 class="text-lg font-bold text-slate-800">
+                            Detail Laporan
+                        </h3>
+                        <button
+                            @click="showModal = false"
+                            class="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
                         >
-                        <p class="text-slate-900 font-medium">
-                            {{ selectedReport.user.name }}
-                            <span class="text-slate-500 font-normal"
-                                >({{ selectedReport.user.email }})</span
-                            >
-                        </p>
+                            <X class="w-5 h-5" />
+                        </button>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div
+                        class="p-6 max-h-[70vh] overflow-y-auto space-y-5 text-left"
+                    >
                         <div>
                             <span
                                 class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
-                                >Kategori</span
+                                >Pelapor</span
                             >
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
-                            >
-                                {{ selectedReport.category }}
-                            </span>
+                            <p class="text-slate-900 font-medium">
+                                {{ selectedReport.user.name }}
+                                <span class="text-slate-500 font-normal"
+                                    >({{ selectedReport.user.email }})</span
+                                >
+                            </p>
                         </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <span
+                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                    >Kategori</span
+                                >
+                                <span
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                                >
+                                    {{ selectedReport.category }}
+                                </span>
+                            </div>
+                            <div>
+                                <span
+                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                    >Lokasi Ruangan</span
+                                >
+                                <p class="text-slate-900">
+                                    {{ selectedReport.room_name }}
+                                </p>
+                            </div>
+                        </div>
+
                         <div>
                             <span
                                 class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
-                                >Lokasi Ruangan</span
+                                >Nama Barang</span
                             >
-                            <p class="text-slate-900">
-                                {{ selectedReport.room_name }}
+                            <p class="text-slate-900 font-medium">
+                                {{ selectedReport?.item_name || "-" }}
                             </p>
                         </div>
-                    </div>
 
-                    <div>
-                        <span
-                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
-                            >Nama Barang</span
-                        >
-                        <p class="text-slate-900 font-medium">
-                            {{ selectedReport?.item_name || "-" }}
-                        </p>
-                    </div>
-
-                    <div>
-                        <span
-                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
-                            >Deskripsi Detail</span
-                        >
-                        <p
-                            class="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 whitespace-pre-wrap leading-relaxed"
-                        >
-                            {{ selectedReport.description }}
-                        </p>
-                    </div>
-
-                    <div class="mt-4 pt-4 border-t border-slate-100">
-                        <span
-                            class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3"
-                            >Foto Bukti Keluhan</span
-                        >
-                        <div v-if="selectedReport.image_path">
-                            <img
-                                :src="'/storage/' + selectedReport.image_path"
-                                alt="Foto Bukti"
-                                class="rounded-lg max-h-96 w-full object-contain bg-slate-100 border border-slate-200"
-                            />
-                        </div>
-                        <div
-                            v-else
-                            class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-center"
-                        >
-                            <p class="text-slate-500 italic text-sm">
-                                Pelapor tidak melampirkan foto bukti.
+                        <div>
+                            <span
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1"
+                                >Deskripsi Detail</span
+                            >
+                            <p
+                                class="text-slate-700 bg-slate-50 p-4 rounded-lg border border-slate-100 whitespace-pre-wrap leading-relaxed"
+                            >
+                                {{ selectedReport.description }}
                             </p>
                         </div>
-                    </div>
-                </div>
 
-                <div
-                    class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end"
-                >
-                    <button
-                        @click="showModal = false"
-                        class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm"
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <span
+                                class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3"
+                                >Foto Bukti Keluhan</span
+                            >
+                            <div v-if="selectedReport.image_path">
+                                <img
+                                    :src="
+                                        selectedReport.image_path.startsWith(
+                                            'http',
+                                        )
+                                            ? selectedReport.image_path
+                                            : '/storage/' +
+                                              selectedReport.image_path
+                                    "
+                                    alt="Foto Bukti"
+                                    class="w-full h-auto rounded-lg border border-slate-200"
+                                />
+                            </div>
+                            <div
+                                v-else
+                                class="p-4 bg-slate-50 border border-dashed border-slate-300 rounded-lg text-center"
+                            >
+                                <p class="text-slate-500 italic text-sm">
+                                    Pelapor tidak melampirkan foto bukti.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end"
                     >
-                        Tutup Jendela
-                    </button>
+                        <button
+                            @click="showModal = false"
+                            class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm"
+                        >
+                            Tutup Jendela
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Transition>
     </AuthenticatedLayout>
 </template>

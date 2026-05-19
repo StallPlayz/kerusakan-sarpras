@@ -4,7 +4,13 @@ import InputError from "@/Components/InputError.vue";
 import { ref, onMounted, onUnmounted } from "vue";
 import { User, Mail, Key, AlertTriangle, X } from "@lucide/vue";
 
-const props = defineProps({ show: Boolean });
+const props = defineProps({
+    show: Boolean,
+    isMobile: {
+        type: Boolean,
+        default: false,
+    },
+});
 const emit = defineEmits(["close"]);
 
 const user = usePage().props.auth.user;
@@ -78,17 +84,41 @@ onUnmounted(() => {
 
 <template>
     <transition
-        enter-active-class="transition ease-out duration-200 origin-top-right"
-        enter-from-class="opacity-0 scale-95 translate-x-4"
-        enter-to-class="opacity-100 scale-100 translate-x-0"
-        leave-active-class="transition ease-in duration-150 origin-top-right"
-        leave-from-class="opacity-100 scale-100 translate-x-0"
-        leave-to-class="opacity-0 scale-95 translate-x-4"
+        :enter-active-class="
+            isMobile
+                ? 'transition-all ease-out duration-300 overflow-hidden'
+                : 'transition ease-out duration-200 origin-top-right'
+        "
+        :enter-from-class="
+            isMobile ? 'opacity-0 max-h-0' : 'opacity-0 scale-95 translate-x-4'
+        "
+        :enter-to-class="
+            isMobile
+                ? 'opacity-100 max-h-[800px]'
+                : 'opacity-100 scale-100 translate-x-0'
+        "
+        :leave-active-class="
+            isMobile
+                ? 'transition-all ease-in duration-200 overflow-hidden'
+                : 'transition ease-in duration-150 origin-top-right'
+        "
+        :leave-from-class="
+            isMobile
+                ? 'opacity-100 max-h-[800px]'
+                : 'opacity-100 scale-100 translate-x-0'
+        "
+        :leave-to-class="
+            isMobile ? 'opacity-0 max-h-0' : 'opacity-0 scale-95 translate-x-4'
+        "
     >
         <div
             v-show="show"
             @click.stop
-            class="absolute right-[100%] top-0 mr-1 z-50 w-[320px] bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200 overflow-hidden"
+            :class="
+                isMobile
+                    ? 'w-full bg-slate-50 border-y border-slate-200'
+                    : 'absolute right-[100%] top-0 mr-1 z-50 w-[320px] bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-200 overflow-hidden'
+            "
         >
             <div class="p-5">
                 <div
